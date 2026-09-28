@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript, Start to Finish</title>
+<style>
+  :root{
+    --ink:#1b1f23;
+    --paper:#fbfaf7;
+    --line:#dcd6c9;
+    --accent:#2f6f5e;
+    --accent-deep:#1f4d40;
+    --code-bg:#12181a;
+    --code-ink:#e6e6e0;
+    --amber:#c98a2c;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Iowan Old Style","Georgia",serif;
+    line-height:1.6;
+  }
+  .mono{font-family:"SFMono-Regular","Consolas","Menlo",monospace;}
+
+  header.hero{
+    padding:5.5rem 1.5rem 4rem;
+    max-width:760px;
+    margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  .kicker{
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.85rem;
+    color:var(--accent-deep);
+    margin:0 0 1rem;
+  }
+  h1{
+    font-size:clamp(2.2rem, 5vw, 3.3rem);
+    line-height:1.08;
+    margin:0 0 1.2rem;
+    max-width:14ch;
+  }
+  .hero p{
+    font-size:1.15rem;
+    max-width:56ch;
+    color:#3a3f42;
+  }
+
+  main{max-width:760px; margin:0 auto; padding:0 1.5rem 6rem;}
+
+  section{margin-top:4rem;}
+  section h2{
+    font-size:1.6rem;
+    margin-bottom:0.3rem;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:0.5rem;
+  }
+  section > p.lead{color:#3a3f42; margin-top:0.9rem;}
+
+  pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:1.1rem 1.3rem;
+    border-radius:6px;
+    overflow-x:auto;
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.92rem;
+    line-height:1.55;
+  }
+  code{font-family:"SFMono-Regular","Consolas","Menlo",monospace;}
+  p code, li code{
+    background:#efe9d8;
+    padding:0.1em 0.4em;
+    border-radius:3px;
+    font-size:0.9em;
+  }
+
+  /* Live compiler */
+  .compiler{
+    margin-top:4.5rem;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .compiler-head{
+    background:var(--ink);
+    color:#efe9d8;
+    padding:0.9rem 1.2rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.85rem;
+  }
+  .dots{display:flex; gap:6px;}
+  .dots span{width:10px; height:10px; border-radius:50%; display:inline-block;}
+  .dots span:nth-child(1){background:#e0665a;}
+  .dots span:nth-child(2){background:#e3b341;}
+  .dots span:nth-child(3){background:#5fb37a;}
+
+  textarea#editor{
+    width:100%;
+    min-height:220px;
+    border:none;
+    resize:vertical;
+    background:var(--code-bg);
+    color:var(--code-ink);
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.92rem;
+    padding:1.2rem 1.3rem;
+    line-height:1.6;
+    outline:none;
+  }
+  .compiler-actions{
+    display:flex;
+    gap:0.7rem;
+    align-items:center;
+    padding:0.8rem 1.2rem;
+    background:#f2eee2;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  button#run-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:0.55rem 1.3rem;
+    border-radius:6px;
+    font-size:0.95rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  button#run-btn:hover{background:var(--accent-deep);}
+  button#clear-btn{
+    background:transparent;
+    border:1px solid #b9b2a0;
+    color:var(--ink);
+    padding:0.55rem 1.1rem;
+    border-radius:6px;
+    font-size:0.9rem;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .hint{font-size:0.8rem; color:#6b655a; margin-left:auto;}
+
+  #output{
+    background:#0d1113;
+    color:#d7f5e3;
+    min-height:110px;
+    padding:1rem 1.3rem;
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.9rem;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  #output .err{color:#f28b7d;}
+  #output .empty{color:#5b655e; font-style:italic;}
+
+  .try-list{margin-top:1.3rem;}
+  .try-list button{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:0.6rem 0.9rem;
+    margin-bottom:0.5rem;
+    font-family:"SFMono-Regular","Consolas","Menlo",monospace;
+    font-size:0.85rem;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .try-list button:hover{border-color:var(--accent); color:var(--accent-deep);}
+
+  footer{
+    max-width:760px;
+    margin:0 auto;
+    padding:2.5rem 1.5rem 4rem;
+    color:#6b655a;
+    font-size:0.85rem;
+    border-top:1px solid var(--line);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#e9e5d8;
+      --paper:#181613;
+      --line:#3a352c;
+      --accent:#6fbfa4;
+      --accent-deep:#9be0c8;
+    }
+    body{color:var(--ink);}
+    p code, li code{background:#2a2620; color:#e9e5d8;}
+    .compiler{background:#1e1b16;}
+    .compiler-actions{background:#221f19;}
+    button#clear-btn{color:var(--ink); border-color:#5a5346;}
+    .try-list button{background:#221f19; color:var(--ink);}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="kicker mono">A short, hands-on primer</p>
+  <h1>JavaScript, start to finish</h1>
+  <p>Six ideas that carry the whole language: variables, functions, conditionals,
+     loops, arrays, and objects. Read a bit, then run it yourself in the editor
+     built into this page — no installs, no account, no other tab.</p>
+</header>
+
+<main>
+
+<section id="variables">
+  <h2>1. Variables</h2>
+  <p class="lead">A variable is a named box for a value. Use <code>let</code> when the value
+     will change, and <code>const</code> when it won't.</p>
+  <pre><code>let score = 10;
+score = score + 5;
+
+const name = "Ada";
+
+console.log(score, name);</code></pre>
+</section>
+
+<section id="functions">
+  <h2>2. Functions</h2>
+  <p class="lead">A function packages up a piece of logic so you can reuse it with
+     different inputs.</p>
+  <pre><code>function greet(person) {
+  return "Hello, " + person + "!";
+}
+
+console.log(greet("world"));</code></pre>
+</section>
+
+<section id="conditionals">
+  <h2>3. Conditionals</h2>
+  <p class="lead"><code>if</code> / <code>else</code> lets your program choose between paths
+     based on a condition.</p>
+  <pre><code>const hour = 14;
+
+if (hour < 12) {
+  console.log("Good morning");
+} else if (hour < 18) {
+  console.log("Good afternoon");
+} else {
+  console.log("Good evening");
+}</code></pre>
+</section>
+
+<section id="loops">
+  <h2>4. Loops</h2>
+  <p class="lead">A <code>for</code> loop repeats a block of code while a condition holds.</p>
+  <pre><code>for (let i = 1; i <= 5; i++) {
+  console.log("Round " + i);
+}</code></pre>
+</section>
+
+<section id="arrays">
+  <h2>5. Arrays</h2>
+  <p class="lead">An array holds an ordered list of values. Methods like
+     <code>map</code> and <code>filter</code> let you transform a list without
+     writing a manual loop.</p>
+  <pre><code>const fruits = ["apple", "fig", "kiwi"];
+const shouted = fruits.map(f => f.toUpperCase());
+
+console.log(shouted);</code></pre>
+</section>
+
+<section id="objects">
+  <h2>6. Objects</h2>
+  <p class="lead">An object groups related values together under named keys —
+     useful for describing a single "thing" with several properties.</p>
+  <pre><code>const book = {
+  title: "Dune",
+  author: "Frank Herbert",
+  year: 1965
+};
+
+console.log(book.title + " (" + book.year + ")");</code></pre>
+</section>
+
+<section id="try-it">
+  <h2>Try it yourself</h2>
+  <p class="lead">This runs real JavaScript, live, right here in the page.
+     Edit the code below and press <strong>Run</strong> — or load one of the examples above.</p>
+
+  <div class="compiler">
+    <div class="compiler-head">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <span>script.js</span>
+    </div>
+    <textarea id="editor" spellcheck="false">function greet(person) {
+  return "Hello, " + person + "!";
+}
+
+console.log(greet("world"));
+console.log(2 + 2);</textarea>
+    <div class="compiler-actions">
+      <button id="run-btn">▶ Run</button>
+      <button id="clear-btn">Clear output</button>
+      <span class="hint">Output appears below</span>
+    </div>
+    <div id="output"><span class="empty">Press Run to see the output here.</span></div>
+  </div>
+
+  <div class="try-list">
+    <p class="lead" style="margin-bottom:0.6rem;">Or load a snippet from above:</p>
+    <button data-snippet="variables">let score = 10;
+score = score + 5;
+const name = "Ada";
+console.log(score, name);</button>
+    <button data-snippet="loops">for (let i = 1; i <= 5; i++) {
+  console.log("Round " + i);
+}</button>
+    <button data-snippet="arrays">const fruits = ["apple", "fig", "kiwi"];
+const shouted = fruits.map(f => f.toUpperCase());
+console.log(shouted);</button>
+    <button data-snippet="objects">const book = { title: "Dune", author: "Frank Herbert", year: 1965 };
+console.log(book.title + " (" + book.year + ")");</button>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Built with plain HTML, CSS and JavaScript — no build step, no dependencies.
+  Ready to deploy as-is on Netlify.
+</footer>
+
+<script>
+(function () {
+  const editor = document.getElementById("editor");
+  const output = document.getElementById("output");
+  const runBtn = document.getElementById("run-btn");
+  const clearBtn = document.getElementById("clear-btn");
+
+  function run() {
+    const code = editor.value;
+    const logs = [];
+
+    function fmt(arg) {
+      if (typeof arg === "object" && arg !== null) {
+        try { return JSON.stringify(arg); } catch (e) { return String(arg); }
+      }
+      return String(arg);
+    }
+
+    const fakeConsole = {
+      log: function (...args) { logs.push(args.map(fmt).join(" ")); },
+      error: function (...args) { logs.push("Error: " + args.map(fmt).join(" ")); },
+      warn: function (...args) { logs.push("Warning: " + args.map(fmt).join(" ")); }
+    };
+
+    try {
+      const runner = new Function("console", code);
+      runner(fakeConsole);
+      output.innerHTML = logs.length
+        ? logs.map(l => l.replace(/</g, "&lt;")).join("\n")
+        : '<span class="empty">Ran with no output. Try a console.log(...) statement.</span>';
+    } catch (err) {
+      const prior = logs.length ? logs.map(l => l.replace(/</g, "&lt;")).join("\n") + "\n" : "";
+      output.innerHTML = prior + '<span class="err">' + String(err).replace(/</g, "&lt;") + "</span>";
+    }
+  }
+
+  function clearOutput() {
+    output.innerHTML = '<span class="empty">Press Run to see the output here.</span>';
+  }
+
+  runBtn.addEventListener("click", run);
+  clearBtn.addEventListener("click", clearOutput);
+
+  document.querySelectorAll(".try-list button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      editor.value = btn.textContent;
+      run();
+      document.querySelector(".compiler").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
